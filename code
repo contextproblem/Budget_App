@@ -1,6 +1,6 @@
+# a budget app
 
-
-# A budget app
+import json 
 
 def add_expense(expenses, description, amount):
     expenses.append({"description": description, "amount": amount})
@@ -23,11 +23,29 @@ def show_budget_details(budget, expenses):
     print(f"Total Spent: {get_total_expenses(expenses)}")
     print(f"Remaining budget: {get_balance(budget, expenses)}")
 
+def load_budget_data(filepath):
+    try:
+        with open (filepath, 'r') as file:
+            data = json.load(file)
+            return data["initial_budget"],  data["expenses"]
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 0, [] # return default values if the file doesn't exist or is empty
+
+def save_budget_details(filepath, initial_budget, expenses):
+    data = {
+        'initial_budget': initial_budget,
+        'expenses': expenses
+    }
+    with open(filepath, 'w') as file:
+        json.dump(data, file, indent=4)
+
 def main():
     print("Welcome to the Budget App")
-    initial_budget = float(input("Enter initial budget: "))  
+    filepath = 'budget_data.json' # path to json file
+    initial_budget, expenses = load_budget_data(filepath)
+    if initial_budget == 0:
+        initial_budget = float(input("Please input your initial budget: "))
     budget = initial_budget
-    expenses = []
 
     while True:
         print("\nWhat would you like to do?")
@@ -43,11 +61,11 @@ def main():
             amount = float(input("Enter expense amount: "))
             add_expense(expenses, description, amount)  
         elif choice == "3":
-            print("Goodbye!")  
+            save_budget_details(filepath, initial_budget, expenses)
+            print("Changes Saved, Goodbye!")  
             break
         else:
             print("Invalid option, please try again")
-
 
 if __name__ == "__main__":  
     main()  
